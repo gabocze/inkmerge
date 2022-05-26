@@ -20,7 +20,7 @@
         <item>eps</item>
         <item>svg</item>
       </param>
-      <param name="output" type="string" _gui-text="Output file-name">$HOME/.../%VAR_file%.svg</param>
+      <param name="pattern" type="string" _gui-text="Output file-name">$HOME/.../%VAR_file%.svg</param>
       <_param name="info3" type="description">The output file-name should include a variable pattern in order to save each output image in a separate file.</_param>
       <param name="dpi" type="string" _gui-text="DPI (for .bitmap files):">90</param>
     </page>

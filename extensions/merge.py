@@ -35,15 +35,15 @@ class Merger(inkex.Effect):
         # TODO shoudl use super(Merger, self).__init__() ?????
         inkex.Effect.__init__(self)
         # Define  options
-        self.OptionParser.add_option('--extra-vars', action = 'store', type = 'string', dest = 'extraVars', default = '')
-        self.OptionParser.add_option('--data-file', action = 'store', type = 'string', dest = 'dataFile' )
-        self.OptionParser.add_option('--format', action = 'store', type = 'string', dest = 'outputFormat', default = DEFAULT_FORMAT ) 
-        self.OptionParser.add_option('--output', action = 'store', type = 'string', dest = 'outputPattern', default = None )
-        self.OptionParser.add_option('--tab', action="store", type="string", dest="tab", help="The selected UI-tab when OK was pressed") 
-        self.OptionParser.add_option('--var-template', action="store", type="string", dest="varTemplate", default = DEFAULT_TEMPLATE)
-        self.OptionParser.add_option('--pair-separator', action="store", type="string", dest="pairSep", default = "=>")
-        self.OptionParser.add_option('--var-separator', action="store", type="string", dest="varSep", default = "|")
-        self.OptionParser.add_option('--dpi', action="store", type="int", dest="dpi", default = DEFAULT_DPI)
+        self.arg_parser.add_argument('--extra-vars', action = 'store', type = ascii, dest = 'extraVars', default = '')
+        self.arg_parser.add_argument('--data-file', action = 'store', type = ascii, dest = 'dataFile' )
+        self.arg_parser.add_argument('--format', action = 'store', type = ascii, dest = 'outputFormat', default = DEFAULT_FORMAT )
+        self.arg_parser.add_argument('--pattern', action = 'store', type = ascii, dest = 'outputPattern', default = None )
+        self.arg_parser.add_argument('--tab', action="store", type=ascii, dest="tab", help="The selected UI-tab when OK was pressed")
+        self.arg_parser.add_argument('--var-template', action="store", type=ascii, dest="varTemplate", default = DEFAULT_TEMPLATE)
+        self.arg_parser.add_argument('--pair-separator', action="store", type=ascii, dest="pairSep", default = "=>")
+        self.arg_parser.add_argument('--var-separator', action="store", type=ascii, dest="varSep", default = "|")
+        self.arg_parser.add_argument('--dpi', action="store", type=int, dest="dpi", default = DEFAULT_DPI)
         self.texts = None
         self.messages = []
 
@@ -162,7 +162,8 @@ class Merger(inkex.Effect):
         for datum in row:
             # remove control characters
             # datum = "".join([c for c in datum if ord(c) >= 32 ])
-            datum = unicode(datum, UTF8)
+            if sys.version_info[0] < 3:
+                datum = unicode(datum, UTF8)
             for field in self.fields(col):
                 self.replaceText(newDoc, field, datum)
                 self.replaceImages(newDoc, field, datum)
@@ -174,11 +175,11 @@ class Merger(inkex.Effect):
     def getData(self):
         """ Get the csv file, extract field names and process remaiing lines. """
         fileName = self.options.dataFile
-        if fileName and os.path.isfile(fileName):
-            dataReader = csv.reader(open(fileName, "U"))
+        if fileName and os.path.isfile(r'C:\Users\Notebook\inkscape-merge\fixtures\testdata.csv'):
+            dataReader = csv.reader(open(r'C:\Users\Notebook\inkscape-merge\fixtures\testdata.csv', "U"))
         else:
             raise  Exception("Data file not found: [%s]" % fileName)
-        self.fieldNames = dataReader.next()
+        self.fieldNames = next(dataReader)
         return dataReader
 
     def effect(self):
