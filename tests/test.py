@@ -5,7 +5,7 @@ import os
 class test_invoke_merge(unittest.TestCase):
 
     def test_fail(self):
-        print "foo"
+        print("foo")
         self.assertTrue(False)
 
     def test_inkvok(self):
