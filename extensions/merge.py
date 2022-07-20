@@ -14,7 +14,7 @@ from subprocess import Popen, PIPE, STDOUT
 #TODO mac only?
 #sys.path.append('/Applications/Inkscape.app/Contents/Resources/extensions')
 import inkex
-
+import sys
 # suggest leave other formats to use of a tool like imagemagick rather than  
 # make this plugin depend on that.
 
@@ -118,7 +118,7 @@ class Merger(inkex.Effect):
         inkscape_output = Popen(command, shell=False, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT).communicate()[0]
         if (inkscape_output != ""):
-            self.messages.append("Inkscape output: " + inkscape_output)
+            self.messages.append("Inkscape output: <<%s>>" % str(inkscape_output))
         #TODO use check_call to check for errors ?? inkscape doesn't seem to return != 0 even when,e.g. the input file is not there
         return currentFileName
 
@@ -143,8 +143,20 @@ class Merger(inkex.Effect):
             pairSep = self.options.pairSep
             varSep = self.options.varSep
             self.texts = defaultdict(list)
-            for (text, field) in [i.split(pairSep) for i in self.options.extraVars.split(varSep) if len(i)]:
-                self.texts[field].append(text)
+            #for t in [self.options.extraVars]:
+            #    print(t)
+            #a=self.options.extraVars.split(varSep)
+            #if len(a):
+            #    raise Exception( "[%s]=" % a + str(len(a)) )
+            #raise  Exception("[%s]" % varTemplate+pairSep+varSep)
+            i=self.options.extraVars.split(varSep)
+            if len(i)>1:
+                j=i.split(pairSep)
+                if len(j)>1:
+                    (text,field) = j
+                    self.texts[field].append(text)
+            #for (text, field) in [i.split(pairSep) for i in self.options.extraVars.split(varSep) if len(i)]:
+            #    self.texts[field].append(text)
             for field in self.fieldNames:
                 self.texts[field].append(varTemplate % field)
         return self.texts
@@ -175,8 +187,9 @@ class Merger(inkex.Effect):
     def getData(self):
         """ Get the csv file, extract field names and process remaiing lines. """
         fileName = self.options.dataFile
-        if fileName and os.path.isfile(r'C:\Users\Notebook\inkscape-merge\fixtures\testdata.csv'):
-            dataReader = csv.reader(open(r'C:\Users\Notebook\inkscape-merge\fixtures\testdata.csv', "U"))
+        fileName = r'C:\Users\Notebook\inkscape-merge\datos.csv'
+        if fileName and os.path.isfile(fileName):
+            dataReader = csv.reader(open(fileName, 'r'))
         else:
             raise  Exception("Data file not found: [%s]" % fileName)
         self.fieldNames = next(dataReader)
@@ -184,7 +197,8 @@ class Merger(inkex.Effect):
 
     def effect(self):
         """process data in data file and data in extraVars"""
-        for row in self.getData():
+        rows = self.getData()
+        for row in rows:
             self.process(row)
 
     def invoke(self, 
@@ -205,7 +219,7 @@ class Merger(inkex.Effect):
 
         """
         args=['--data-file=%s' % data_file, 
-              '--output=%s' % output_file_pattern, 
+              '--pattern=%s' % output_file_pattern, 
               '--var-template=%s' % var_template,
               '--format=%s' % output_format,
               '--dpi=%s'% dpi,
@@ -215,4 +229,4 @@ class Merger(inkex.Effect):
 
 if __name__ == "__main__":
     # Create effect instance and apply it.
-    Merger().affect()
+    Merger().run()
